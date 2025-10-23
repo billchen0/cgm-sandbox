@@ -25,7 +25,6 @@ class CGMViewer:
                  gl_range=(0, 400)):
         self.base_path = base_path
         self.subject_id = subject_id
-        self.filename = filename
         self.y_min, self.y_max = gl_range
         raw_cgm_df = load_cgm_data(base_path, 
                                    subject_id=subject_id, 

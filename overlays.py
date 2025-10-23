@@ -1,4 +1,4 @@
-from loader import load_sleep_data, load_activity_data, load_diet_data
+from loader import load_sleep_data, load_activity_data, load_food_entry_data
 from pandas import Timedelta
 import pandas as pd
 import numpy as np
@@ -98,15 +98,17 @@ class StableGlucoseOverlay:
                 )
 
 
-class DietOverlay:
-    def __init__(self, diet_base_path):
-        self.diet_base_path = diet_base_path
+class FoodEntryOverlay:
+    def __init__(self, food_entry_path, filename):
+        self.food_entry_path = food_entry_path
+        self.filename = filename
         self._cursor = None
 
     def draw(self):
         viewer = self.viewer
-        subject_id = viewer.subject_id
-        diet_df = load_diet_data(self.diet_base_path, subject_id, tz=viewer.view_start.tzinfo)
+        diet_df = load_food_entry_data(base_path=self.food_entry_path, 
+                                       subject_id=viewer.subject_id,
+                                       filename=self.filename)
 
         day_meals = diet_df[
             (diet_df["time"] >= viewer.view_start) & (diet_df["time"] < viewer.view_end)
@@ -114,21 +116,22 @@ class DietOverlay:
         if day_meals.empty:
             return
 
-        points = []
-        tooltips = {}
-
+        points, tooltips = [], {}
         for ax, start, end in viewer.iter_axes_by_time():
             ax_df = day_meals[(day_meals["time"] >= start) & (day_meals["time"] < end)]
             for _, row in ax_df.iterrows():
-                nutrients = row["nutrients"]
-                tooltip = f"{row['meal_type']}\n" + "\n".join(f"{k}: {v:.0f}" for k, v in nutrients.items())
+                tip = (
+                    f"{row.get('food_name','Food')}\nCarbs: {row['carbohydrate']:.0f} g"
+                    if pd.notna(row.get("carbohydrate"))
+                    else f"{row.get('food_name','Food')}"
+                )
                 idx = (viewer.df["time"] - row["time"]).abs().idxmin()
                 gl = viewer.df.loc[idx, "gl"]
-
                 s = viewer.scale(120, 50)
-                point = ax.scatter(row["time"], gl, s=s, color="purple", linewidth=1.2, edgecolor="white", zorder=5)
-                points.append(point)
-                tooltips[point] = tooltip
+                pt = ax.scatter(row["time"], gl, s=s, color="purple",
+                                linewidth=1.2, edgecolor="white", zorder=5)
+                points.append(pt)
+                tooltips[pt] = tip
 
         self._cursor = mplcursors.cursor(points, hover=True)
 
@@ -152,7 +155,9 @@ class FastingGlucoseOverlay:
 
     def draw(self):
         viewer = self.viewer
-        diet_df = load_diet_data(self.diet_base_path, viewer.subject_id, tz=viewer.view_start.tzinfo)
+        diet_df = load_food_entry_data(base_path=self.food_entry_path, 
+                                       subject_id=viewer.subject_id,
+                                       filename=self.filename)
         if diet_df.empty:
             return
 
@@ -228,6 +233,9 @@ class TimeInRangeOverlay:
             for _, seg in sub.groupby(seg_id):
                 s = int(seg["_state"].iloc[0])
                 color = self.colors["in"] if s == 0 else (self.colors["high"] if s > 0 else self.colors["low"])
+                i0 = int(seg.index.min())
+                if i0 > 0:
+                    seg = pd.concat([sub.loc[[i0-1]], seg], axis=0)
                 ax.plot(seg["time"], seg["gl"],
                         color=color, linewidth=lw,
                         solid_capstyle="round", zorder=4, clip_on=True)
@@ -244,11 +252,12 @@ class PPGROverlay:
 
     def draw(self):
         v = self.viewer
-        sid = v.subject_id
         tz = getattr(v.view_start, "tzinfo", None)
 
         # Load food log aligned to the viewer's timezone (same pattern you use elsewhere)
-        food_df = load_diet_data(self.food_base_path, sid, tz=tz)
+        food_df = load_food_entry_data(base_path=self.food_entry_path, 
+                                subject_id=v.subject_id,
+                                filename=self.filename)
         if food_df is None or food_df.empty:
             return
 

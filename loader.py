@@ -83,37 +83,37 @@ def load_activity_data(base_path: str, subject_id: int) -> pd.DataFrame:
     return df
 
 
-def load_diet_data(base_path: str, subject_id: int, tz=None) -> pd.DataFrame:
+def load_food_entry_data(base_path: str, 
+                         subject_id: int | None = None, 
+                         filename: str | None = None) -> pd.DataFrame:
     base_path = Path(base_path)
-    json_file = base_path / str(subject_id) / f"{subject_id}_FOODLOG.json"
+    subject_dir = base_path / str(subject_id) if subject_id is not None else base_path
 
-    if not json_file.exists():
-        return pd.DataFrame(columns=["time", "meal_type", "nutrients"])
+    if filename:
+        filename = filename.format(subject_id=subject_id)
+        candidates = [subject_dir / filename, base_path / filename]
+    else:
+        raise ValueError("Must specify either `filename` or `subject_id`.")
 
-    with open(json_file, "r") as file:
-        data = json.load(file)
-        raw = pd.json_normalize(data["body"]["diet"])
+    json_file = next((p for p in candidates if p.exists()), None)
+    if json_file is None:
+        raise FileNotFoundError(f"No food entry file found (tried {candidates})")
 
-    if raw.empty:
-        return pd.DataFrame(columns=["time", "meal_type", "nutrients"])
+    with open(json_file, "r") as f:
+        data = json.load(f)
+
+    body = data.get("body", [])
+    raw_df = pd.json_normalize(body)
 
     df = pd.DataFrame()
-    df["time"] = pd.to_datetime(raw["effective_time_frame.time_interval.start_date_time"])
-    if tz is not None:
-        df["time"] = df["time"].dt.tz_localize(tz)
+    df["time"] = pd.to_datetime(raw_df["effective_time_frame.date_time"], errors="coerce", utc=True)
 
-    df["meal_type"] = raw["meal_type"]
-
-    nutrient_cols = [c for c in raw.columns if c.startswith("nutrients.")]
-    def build_nutrient_dict(row):
-        nutrients = {}
-        for col in nutrient_cols:
-            val = row[col]
-            if pd.notna(val):
-                key = col.split(".")[1]
-                nutrients[key] = float(val)
-        return nutrients
-
-    df["nutrients"] = raw.apply(build_nutrient_dict, axis=1)
+    df["carbohydrate"] = pd.to_numeric(
+        raw_df.get("dietary_intake.carbohydrate.value"), errors="coerce"
+    )
+    food_name_series = raw_df.get("dietary_intake.food_name")
+    if food_name_series is None:
+        food_name_series = pd.Series(["Food"] * len(raw_df))
+    df["food_name"] = food_name_series.astype(str).str.strip()
 
     return df
