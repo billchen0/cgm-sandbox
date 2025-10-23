@@ -15,17 +15,28 @@ TZ_ABBREV = {
     "UTC": "UTC"
 }
 
-def load_cgm_data(base_path: str, subject_id: int, timezone: bool=True) -> pd.DataFrame:
+def load_cgm_data(base_path: str, 
+                  subject_id: int | None = None, 
+                  timezone: bool=True,
+                  filename: str | None = None) -> pd.DataFrame:
     base_path = Path(base_path)
-    subject_dir = base_path / str(subject_id)
+    subject_dir = base_path / str(subject_id) if subject_id is not None else base_path
 
-    json_file = subject_dir / f"{subject_id}_DEX.json"
-    if not json_file.exists():
-        raise FileNotFoundError(f"No CGM file found for subject {subject_id}")
+    if filename:
+        filename = filename.format(subject_id=subject_id)
+        candidates = [subject_dir / filename, base_path / filename]
+    else:
+        raise ValueError("Must specify either `filename` or `subject_id`.")
+
+    json_file = next((p for p in candidates if p.exists()), None)
+    if json_file is None:
+        raise FileNotFoundError(f"No CGM file found (tried {candidates})")
     
     with open(json_file, "r") as file:
         data = json.load(file)
-        raw_df = pd.json_normalize(data["body"]["cgm"])
+    
+    body = data.get("body", {})
+    raw_df = pd.json_normalize(body)
     
     df = pd.DataFrame()
     df["time"] = pd.to_datetime(raw_df["effective_time_frame.time_interval.start_date_time"], utc=True)

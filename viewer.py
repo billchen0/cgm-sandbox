@@ -18,11 +18,19 @@ if os.path.exists(font_path):
 
 
 class CGMViewer:
-    def __init__(self, base_path: str, subject_id: int, gl_range=(0, 400)):
+    def __init__(self, 
+                 base_path: str, 
+                 subject_id: int | None = None,
+                 filename: str | None = None,
+                 gl_range=(0, 400)):
         self.base_path = base_path
         self.subject_id = subject_id
+        self.filename = filename
         self.y_min, self.y_max = gl_range
-        raw_cgm_df = load_cgm_data(base_path, subject_id, timezone=True)
+        raw_cgm_df = load_cgm_data(base_path, 
+                                   subject_id=subject_id, 
+                                   filename=filename, 
+                                   timezone=True)
         self.df = process_cgm(raw_cgm_df)
 
         # Extract unique days
