@@ -126,14 +126,17 @@ def load_food_entry_data(base_path: str,
     raw_df = pd.json_normalize(body)
 
     df = pd.DataFrame()
-    df["time"] = pd.to_datetime(raw_df["effective_time_frame.date_time"], errors="coerce", utc=True)
-
-    df["carbohydrate"] = pd.to_numeric(
-        raw_df.get("dietary_intake.carbohydrate.value"), errors="coerce"
+    df["time"] = pd.to_datetime(
+        raw_df["effective_time_frame.date_time"], errors="coerce", utc=True
     )
-    food_name_series = raw_df.get("dietary_intake.food_name")
+
+    df["carbohydrate"] = pd.to_numeric(raw_df.get("carbohydrate.value"), errors="coerce")
+
+    food_name_series = raw_df.get("food_name")
     if food_name_series is None:
         food_name_series = pd.Series(["Food"] * len(raw_df))
-    df["food_name"] = food_name_series.astype(str).str.strip()
+    df["food_name"] = food_name_series.astype(str).str.strip().replace({"": "food_entry"})
+
+    df["calories"] = pd.to_numeric(raw_df["calories.value"], errors="coerce")
 
     return df

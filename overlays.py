@@ -103,6 +103,12 @@ class FoodEntryOverlay:
         self.food_entry_path = food_entry_path
         self.filename = filename
         self._cursor = None
+    
+    def _size_from_carbs(self, carbs: float, viewer) -> float:
+        carbs = float(np.clip(carbs, 0.0, 100.0))
+        s_min = viewer.scale(40, 15)
+        s_max = viewer.scale(280, 80) 
+        return np.interp(carbs, [0.0, 100.0], [s_min, s_max])
 
     def draw(self):
         viewer = self.viewer
@@ -119,16 +125,19 @@ class FoodEntryOverlay:
         points, tooltips = [], {}
         for ax, start, end in viewer.iter_axes_by_time():
             ax_df = day_meals[(day_meals["time"] >= start) & (day_meals["time"] < end)]
+
             for _, row in ax_df.iterrows():
-                tip = (
-                    f"{row.get('food_name','Food')}\nCarbs: {row['carbohydrate']:.0f} g"
-                    if pd.notna(row.get("carbohydrate"))
-                    else f"{row.get('food_name','Food')}"
-                )
+                food_name = row.get("food_name", "food_entry")
+                carbs_val = row.get("carbohydrate")
+
+                tip = f"{food_name}\nCarbs: {carbs_val:.0f} g" if np.isfinite(carbs_val) else f"{food_name}"
+                
                 idx = (viewer.df["time"] - row["time"]).abs().idxmin()
                 gl = viewer.df.loc[idx, "gl"]
-                s = viewer.scale(120, 50)
-                pt = ax.scatter(row["time"], gl, s=s, color="purple",
+                
+                s = self._size_from_carbs(carbs_val, viewer)
+
+                pt = ax.scatter(row["time"], gl, s=s, color="orange", alpha=0.7,
                                 linewidth=1.2, edgecolor="white", zorder=5)
                 points.append(pt)
                 tooltips[pt] = tip
