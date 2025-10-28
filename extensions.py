@@ -5,8 +5,9 @@ import pandas as pd
 
 
 class HypnogramExtension:
-    def __init__(self, sleep_base_path, gap_threshold=30):
+    def __init__(self, sleep_base_path, filename, gap_threshold=30):
         self.sleep_base_path = sleep_base_path
+        self.filename = filename
         self.gap_threshold = pd.Timedelta(minutes=gap_threshold)
 
     def draw(self):
@@ -16,11 +17,11 @@ class HypnogramExtension:
         start, end = viewer.view_start, viewer.view_end
 
         # Load sleep data for this subject and restrict to current day
-        sleep_df = load_sleep_data(self.sleep_base_path, subject_id)
+        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
         day_sleep = sleep_df[(sleep_df["start"] < end) & (sleep_df["end"] > start)]
 
         # Stage mapping and background shading
-        stage_map = {"awake": 4, "rem": 3, "light": 2, "deep": 1}
+        stage_map = {"Awake": 4, "REM_sleep": 3, "Light_sleep": 2, "Deep_sleep": 1}
         base_color = "#1f77b4"
         alphas = {4: 0.1, 3: 0.25, 2: 0.45, 1: 0.7}
 
@@ -32,7 +33,7 @@ class HypnogramExtension:
             prev_stage = None
 
             for _, row in day_sleep.iterrows():
-                y_val = stage_map.get(row["stage"].lower(), None)
+                y_val = stage_map.get(row["stage"], None)
                 if y_val is None:
                     continue
 

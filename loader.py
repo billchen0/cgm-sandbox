@@ -35,11 +35,11 @@ def load_cgm_data(base_path: str,
     with open(json_file, "r") as file:
         data = json.load(file)
     
-    body = data.get("body", {})
+    body = data.get("body", [])
     raw_df = pd.json_normalize(body)
     
     df = pd.DataFrame()
-    df["time"] = pd.to_datetime(raw_df["effective_time_frame.time_interval.start_date_time"], utc=True)
+    df["time"] = pd.to_datetime(raw_df["effective_time_frame.date_time"], utc=True)
     if timezone:
         tz_str = data.get("header", {}).get("timezone", "UTC").upper()
         tz_name = TZ_ABBREV.get(tz_str, tz_str)
@@ -50,19 +50,39 @@ def load_cgm_data(base_path: str,
     return df
 
 
-def load_sleep_data(base_path: str, subject_id: int) -> pd.DataFrame:
+def load_sleep_data(base_path: str, 
+                    subject_id: int | None = None,
+                    filename: str | None = None) -> pd.DataFrame:
     base_path = Path(base_path)
-    json_file = base_path / str(subject_id) / f"{subject_id}_sleep.json"
+    subject_dir = base_path / str(subject_id) if subject_id is not None else base_path
 
+    if filename:
+        filename = filename.format(subject_id=subject_id)
+        candidates = [subject_dir / filename, base_path / filename]
+    else:
+        raise ValueError("Must specify either `filename` or `subject_id`.")
+    
+    json_file = next((p for p in candidates if p.exists()), None)
+    if json_file is None:
+        raise FileNotFoundError(f"No CGM file found (tried {candidates})")
+    
     with open(json_file, "r") as file:
         data = json.load(file)
     
     records = []
-    for entry in data.get("body", {}).get("sleep", []):
-        start = pd.to_datetime(entry["sleep_stage_time_frame"]["time_interval"]["start_date_time"])
-        end = pd.to_datetime(entry["sleep_stage_time_frame"]["time_interval"]["end_date_time"])
-        stage = entry["sleep_stage_state"]
-        records.append({"start": start, "end": end, "stage": stage})
+
+    body = data.get("body", [])
+
+    for item in body:
+        episodes = item.get("sleep_stage_episodes", [])
+        for ep in episodes:
+            ti = ep.get("sleep_stage_time_frame", {}).get("time_interval", {})
+
+            start = pd.to_datetime(ti.get("start_date_time"), utc=True, errors="coerce")
+            end   = pd.to_datetime(ti.get("end_date_time"),   utc=True, errors="coerce")
+            stage = ep.get("sleep_stage_state")
+
+            records.append({"start": start, "end": end, "stage": stage})
     
     return pd.DataFrame(records)
 
