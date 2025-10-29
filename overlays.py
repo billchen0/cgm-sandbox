@@ -5,7 +5,7 @@ import numpy as np
 import mplcursors
 
 from cgm_methods import detect_stable_glucose, detect_fasting_segments, extract_wakeup_glucose
-
+from cgmquantify import summarize_measures
 
 class WakeupGlucoseOverlay:
     def __init__(self, sleep_base_path, min_sleep_hours=8.0):
@@ -306,3 +306,74 @@ class PPGROverlay:
                         linewidth=lw, solid_capstyle="round",
                         zorder=6, clip_on=True
                     )
+
+
+class CgmMeasuresOverlay:
+
+    def __init__(self,
+                 sd_multiplier: float = 1.0,
+                 loc: str = "top-left",
+                 y: float = 0.965,
+                 margin: float = 0.008,
+                 facecolor: str = "#f7f7f7",
+                 edgecolor: str = "#dcdcdc",
+                 text_color: str = "#111",
+                 pad: float = 0.10):
+        self.sd_multiplier = sd_multiplier
+        self.loc = loc
+        self.y = y
+        self.margin = margin
+        self.facecolor = facecolor
+        self.edgecolor = edgecolor
+        self.text_color = text_color
+        self.pad = pad
+
+    @staticmethod
+    def _fmt(v, unit=""):
+        if v is None or (isinstance(v, float) and not np.isfinite(v)):
+            return "—"
+        return f"{v:.1f}{unit}"
+
+    @staticmethod
+    def _math_bold(label: str) -> str:
+        safe = label.replace("–", "-")
+        safe = safe.replace(" ", r"\ ")
+        return rf"$\bf{{{safe}}}$"
+
+    def draw(self):
+        viewer = getattr(self, "viewer", None)
+        ax = getattr(viewer, "ax_cgm", None)
+        if viewer is None or ax is None or viewer.df.empty:
+            return
+
+        m = summarize_measures(viewer.df, sd_multiplier=self.sd_multiplier)
+
+        parts = [
+            (self._math_bold("TIR"),        self._fmt(m.get("in_range_70_180"), "%")),
+            (self._math_bold("CV"),         self._fmt(m.get("cv_percent"), "%")),
+            (self._math_bold("GMI"),        self._fmt(m.get("gmi_percent"), "%")),
+            (self._math_bold("MAGE"),       self._fmt(m.get("MAGE"), " mg/dL")),
+            (self._math_bold("HBGI"),       self._fmt(m.get("HBGI"))),
+            (self._math_bold("LBGI"),       self._fmt(m.get("LBGI"))),
+        ]
+
+        text = " | ".join([f"{lbl}: {val}" for lbl, val in parts])
+
+        ha = "left" if self.loc == "top-left" else "right"
+        x = self.margin if ha == "left" else 1.0 - self.margin
+
+        ax.text(
+            x, self.y, text,
+            ha=ha, va="center",
+            fontsize=viewer.scale(10, 8),
+            family="monospace",
+            color=self.text_color,
+            transform=ax.transAxes,
+            bbox=dict(
+                facecolor=self.facecolor,
+                edgecolor=self.edgecolor,
+                boxstyle=f"round,pad={self.pad}",
+            ),
+            zorder=15,
+            clip_on=False,
+        )

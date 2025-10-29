@@ -2,7 +2,7 @@ from loader import load_sleep_data
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
-
+import numpy as np
 
 class HypnogramExtension:
     def __init__(self, sleep_base_path, filename, gap_threshold=30):

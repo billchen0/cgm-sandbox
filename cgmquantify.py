@@ -82,7 +82,7 @@ def lbgi(df: pd.DataFrame) -> float:
 def mage_ma(df: pd.DataFrame,
             resample_rule: str = "5min",
             short_win: str = "30min",
-            long_win: str = "2H",
+            long_win: str = "2h",
             sd_multiplier: float = 1.0) -> float:
     """
     Moving-average MAGE:
@@ -104,7 +104,7 @@ def mage_ma(df: pd.DataFrame,
 
     sma = s5.rolling(short_win, min_periods=1, center=True).mean()
     lma = s5.rolling(long_win,  min_periods=1, center=True).mean()
-    diff = (sma - lma).fillna(method="ffill").fillna(0.0)
+    diff = (sma - lma).ffill().fillna(0.0)
     sign = np.sign(diff.values)
     zc_idx = np.where(np.diff(sign) != 0)[0]
     if len(zc_idx) < 1:
@@ -175,13 +175,13 @@ def mage_ma_segments(df: pd.DataFrame,
 # -----------------------------
 # Bundle
 # -----------------------------
-def summarize_metrics(df: pd.DataFrame,
+def summarize_measures(df: pd.DataFrame,
                       sd_multiplier: float = 1.0) -> dict:
     return {
         "cv_percent": cv(df),
         "gmi_percent": gmi(df),
         "HBGI": hbgi(df),
         "LBGI": lbgi(df),
-        "MAGE_MA": mage_ma(df, sd_multiplier=sd_multiplier),
+        "MAGE": mage_ma(df, sd_multiplier=sd_multiplier),
         "in_range_70_180": tir_70_180(df),
     }
