@@ -129,29 +129,20 @@ def mage_ma(df: pd.DataFrame,
 def mage_ma_segments(df: pd.DataFrame,
                      resample_rule: str = "5min",
                      short_win: str = "30min",
-                     long_win: str = "2H",
+                     long_win: str = "2h",
                      sd_multiplier: float = 1.0):
-    """
-    Return [{'t0','t1','amp','t_mid'}] for MA-defined excursions (for on-trace highlighting).
-    """
     g = pd.to_numeric(df["gl"], errors="coerce")
     t = pd.to_datetime(df["time"], errors="coerce")
     good = g.notna() & t.notna()
-    if not good.any():
-        return []
 
     s = pd.Series(g[good].values, index=pd.to_datetime(t[good])).sort_index()
     s5 = s.resample(resample_rule).mean().interpolate("time").dropna()
-    if len(s5) < 5:
-        return []
 
     sma = s5.rolling(short_win, min_periods=1, center=True).mean()
     lma = s5.rolling(long_win,  min_periods=1, center=True).mean()
-    diff = (sma - lma).fillna(method="ffill").fillna(0.0)
+    diff = (sma - lma).ffill().fillna(0.0)
     sign = np.sign(diff.values)
     zc_idx = np.where(np.diff(sign) != 0)[0]
-    if len(zc_idx) < 1:
-        return []
 
     segs = []
     seg_edges = [0] + (zc_idx + 1).tolist() + [len(s5)]

@@ -5,7 +5,7 @@ import numpy as np
 import mplcursors
 
 from cgm_methods import detect_stable_glucose, detect_fasting_segments, extract_wakeup_glucose
-from cgmquantify import summarize_measures
+from cgmquantify import summarize_measures, cv, mage_ma_segments
 
 class WakeupGlucoseOverlay:
     def __init__(self, sleep_base_path, min_sleep_hours=8.0):
@@ -377,3 +377,160 @@ class CgmMeasuresOverlay:
             zorder=15,
             clip_on=False,
         )
+
+
+class CvOverlay:
+    def __init__(self, color="#4a90e2", alpha=0.14, scope="window"):
+        self.color = color
+        self.alpha = alpha
+        self.scope = scope
+
+    def draw(self):
+        viewer = getattr(self, "viewer", None)
+        ax = getattr(viewer, "ax_cgm", None)
+
+        if self.scope == "full":
+            w = viewer.df
+        else:
+            start, end = viewer.view_start, viewer.view_end
+            w = viewer.df[(viewer.df["time"] >= start) & (viewer.df["time"] < end)]
+
+        g = pd.to_numeric(w["gl"], errors="coerce").dropna()
+
+        mean = float(np.nanmean(g))
+        cv_percent = float(cv(w))
+        sd = (cv_percent * mean) / 100.0
+
+        # Visualization
+        ax.axhline(mean, color=self.color, linewidth=viewer.scale(1.8, 1.2), alpha=0.7, zorder=-2)
+        ax.axhspan(mean - sd, mean + sd, color=self.color, alpha=self.alpha, zorder=-3)
+
+        # Annotation pill (top-right), bold label via mathtext
+        txt = f"$\\bf{{CV}}$: {cv_percent:.1f}%   $\\bf{{Mean}}$: {mean:.1f}   $\\bf{{±1SD}}$: {sd:.1f}"
+        ax.text(
+            0.995, 0.965, txt,
+            ha="right", va="center",
+            fontsize=viewer.scale(10, 8), family="monospace", color="#111",
+            transform=ax.transAxes,
+            bbox=dict(facecolor="#f7f7f7", edgecolor="#dcdcdc", boxstyle="round,pad=0.10"),
+            zorder=5, clip_on=False
+        )
+
+
+class MageOverlay:
+    """
+    Visualizes MAGE (MA) excursions for the *current window* (daily panel):
+      • shaded span over each counted segment [t0, t1]
+      • vertical amplitude bar at segment midpoint from local min→max
+      • optional short/long MAs for context (thin lines)
+    No text values are shown; this is interpretation-first.
+
+    Parameters
+    ----------
+    resample_rule : str        Default "5min" (must match your mage_ma_segments)
+    short_win     : str        Default "30min"
+    long_win      : str        Default "2H"
+    sd_multiplier : float      Default 1.0 (threshold = sd_multiplier * SD)
+    color_up      : str        Fill/line color when segment trends up (max after min)
+    color_down    : str        Fill/line color when segment trends down (min after max)
+    fill_alpha    : float      Span transparency
+    line_alpha    : float      Amplitude bar transparency
+    show_ma       : bool       Plot short/long MAs for context (thin)
+    ma_colors     : tuple      (short_color, long_color)
+    """
+    def __init__(self,
+                 resample_rule: str = "5min",
+                 short_win: str = "30min",
+                 long_win: str = "2h",
+                 sd_multiplier: float = 1.0,
+                 color_up: str = "#8bd3c7",
+                 color_down: str = "#f4a6b8",
+                 fill_alpha: float = 0.18,
+                 line_alpha: float = 0.9,
+                 show_ma: bool = False,
+                 ma_colors: tuple[str, str] = ("#2c7fb8", "#7b3294")):
+        self.resample_rule = resample_rule
+        self.short_win = short_win
+        self.long_win = long_win
+        self.sd_multiplier = sd_multiplier
+        self.color_up = color_up
+        self.color_down = color_down
+        self.fill_alpha = fill_alpha
+        self.line_alpha = line_alpha
+        self.show_ma = show_ma
+        self.ma_colors = ma_colors
+
+    def _subset_window(self, df: pd.DataFrame, start, end) -> pd.DataFrame:
+        return df[(df["time"] >= start) & (df["time"] < end)].copy()
+
+    def _local_minmax(self, df: pd.DataFrame, t0, t1) -> tuple[float, float, float, float]:
+        w = df[(df["time"] >= t0) & (df["time"] <= t1)]
+        g = pd.to_numeric(w["gl"], errors="coerce").dropna()
+
+        gmin = float(g.min())
+        gmax = float(g.max())
+
+        g_first = float(g.iloc[0])
+        g_last = float(g.iloc[-1])
+        return gmin, gmax, g_first, g_last
+
+    def _draw_ma_thin(self, ax, df: pd.DataFrame, viewer):
+        s = pd.Series(pd.to_numeric(df["gl"], errors="coerce").values,
+                      index=pd.to_datetime(df["time"], errors="coerce")).dropna()
+        if s.empty:
+            return
+        s = s.sort_index()
+        s5 = s.resample(self.resample_rule).mean().interpolate("time").dropna()
+        sma = s5.rolling(self.short_win, min_periods=1, center=True).mean()
+        lma = s5.rolling(self.long_win,  min_periods=1, center=True).mean()
+
+        ax.plot(sma.index, sma.values, color=self.ma_colors[0],
+                linewidth=viewer.scale(1.0, 0.8), alpha=0.7, zorder=2)
+        ax.plot(lma.index, lma.values, color=self.ma_colors[1],
+                linewidth=viewer.scale(1.0, 0.8), alpha=0.7, zorder=2)
+
+    def draw(self):
+        viewer = getattr(self, "viewer", None)
+        ax = getattr(viewer, "ax_cgm", None)
+        if viewer is None or ax is None:
+            return
+
+        window_df = self._subset_window(viewer.df, viewer.view_start, viewer.view_end)
+        if window_df.empty:
+            return
+
+        segs = mage_ma_segments(
+            window_df,
+            resample_rule=self.resample_rule,
+            short_win=self.short_win,
+            long_win=self.long_win,
+            sd_multiplier=self.sd_multiplier
+        )
+
+        if self.show_ma:
+            self._draw_ma_thin(ax, window_df, viewer)
+
+        dt_total = (viewer.view_end - viewer.view_start)
+        cap_half = dt_total * 0.006
+
+        for seg in segs:
+            t0, t1 = seg["t0"], seg["t1"]
+            t_mid = seg["t_mid"]
+
+            gmin, gmax, g_first, g_last = self._local_minmax(window_df, t0, t1)
+
+            is_up = (g_last >= g_first)
+            color = self.color_up if is_up else self.color_down
+
+            # Shade the segment duration
+            ax.axvspan(t0, t1, color=color, alpha=self.fill_alpha, zorder=1)
+
+            # Amplitude whisker at midpoint
+            ax.vlines(t_mid, gmin, gmax, color=color,
+                      linewidth=viewer.scale(2.0, 1.5), alpha=self.line_alpha, zorder=3)
+
+            # Small end-caps at min/max (to visually bracket amplitude)
+            ax.hlines(gmin, t_mid - cap_half, t_mid + cap_half, color=color,
+                      linewidth=viewer.scale(1.5, 1.2), alpha=self.line_alpha, zorder=3)
+            ax.hlines(gmax, t_mid - cap_half, t_mid + cap_half, color=color,
+                      linewidth=viewer.scale(1.5, 1.2), alpha=self.line_alpha, zorder=3)
