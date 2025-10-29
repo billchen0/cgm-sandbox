@@ -130,7 +130,7 @@ class FoodEntryOverlay:
                 food_name = row.get("food_name", "food_entry")
                 carbs_val = row.get("carbohydrate")
 
-                tip = f"{food_name}\nCarbs: {carbs_val:.0f} g" if np.isfinite(carbs_val) else f"{food_name}"
+                tip = f"{food_name}\n$\\bf{{Carbs:}}$ {carbs_val:.0f} g"
                 
                 idx = (viewer.df["time"] - row["time"]).abs().idxmin()
                 gl = viewer.df.loc[idx, "gl"]
@@ -147,7 +147,7 @@ class FoodEntryOverlay:
         @self._cursor.connect("add")
         def on_hover(sel):
             sel.annotation.set_text(tooltips.get(sel.artist, ""))
-            sel.annotation.get_bbox_patch().set(fc="lavender", alpha=0.85)
+            sel.annotation.get_bbox_patch().set(fc="orange", alpha=0.4)
 
         @self._cursor.connect("remove")
         def on_unhover(sel):
