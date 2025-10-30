@@ -13,7 +13,6 @@ class HypnogramExtension:
     def draw(self):
         viewer = self.viewer
         ax = self.ax
-        subject_id = viewer.subject_id
         start, end = viewer.view_start, viewer.view_end
 
         # Load sleep data for this subject and restrict to current day

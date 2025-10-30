@@ -1,45 +1,63 @@
-from loader import load_sleep_data, load_activity_data, load_food_entry_data
+from loader import load_sleep_data, load_food_entry_data
 from pandas import Timedelta
 import pandas as pd
 import numpy as np
 import mplcursors
 
-from cgm_methods import detect_stable_glucose, detect_fasting_segments, extract_wakeup_glucose
+from cgm_methods import extract_wakeup_glucose
 from cgmquantify import summarize_measures, cv, mage_ma_segments
 
-class WakeupGlucoseOverlay:
-    def __init__(self, sleep_base_path, filename, min_sleep_hours=8.0):
-        self.sleep_base_path = sleep_base_path
-        self.min_sleep_hours = min_sleep_hours
-        self.filename = filename
+
+# --------------------------------
+# Basic Overlays
+# --------------------------------
+class TimeInRangeOverlay:
+    def __init__(self, low=70, high=180,
+                 colors=None, show_lines=True, gap_minutes=10):
+        self.low = low
+        self.high = high
+        self.show_lines = show_lines
+        self.gap = Timedelta(minutes=gap_minutes)
+        self.colors = colors or {
+            "in":   "#22a559",  # green
+            "low":  "#d9534f",  # red
+            "high": "#f39c12",  # orange
+            "line": "#e0e0e0"   # threshold lines
+        }
 
     def draw(self):
-        viewer = self.viewer
-        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
-        wg_df = extract_wakeup_glucose(viewer.df, sleep_df, min_sleep_hours=self.min_sleep_hours)
-        if wg_df.empty:
-            return
+        v = self.viewer
+        for ax, start, end in v.iter_axes_by_time():
+            # Threshold lines
+            if self.show_lines:
+                ax.axhline(self.low,  color=self.colors["line"], linewidth=1.0, zorder=1)
+                ax.axhline(self.high, color=self.colors["line"], linewidth=1.0, zorder=1)
 
-        wg_df = wg_df[
-            (wg_df["wakeup_time"] >= viewer.view_start) & (wg_df["wakeup_time"] < viewer.view_end)
-        ]
+            # Data in this axis window
+            sub = v.df[(v.df["time"] >= start) & (v.df["time"] <= end)][["time", "gl"]].dropna()
+            if sub.empty:
+                continue
+            sub = sub.sort_values("time").reset_index(drop=True)
 
-        for ax, start, end in viewer.iter_axes_by_time():
-            ax_df = wg_df[(wg_df["wakeup_time"] >= start) & (wg_df["wakeup_time"] < end)]
-            for _, row in ax_df.iterrows():
-                s = viewer.scale(150, 60)
-                fs = viewer.scale(10, 7)
+            # Classify each point: -1 (below), 0 (in), +1 (above)
+            state = np.where(sub["gl"] < self.low, -1,
+                             np.where(sub["gl"] > self.high, 1, 0))
+            sub["_state"] = state
 
-                ax.scatter(row["wakeup_time"], row["wakeup_glucose"],
-                           color="blue", s=s, edgecolor="white", linewidth=1.2, alpha=1, zorder=5)
-                ax.text(
-                    row["wakeup_time"], row["wakeup_glucose"] - viewer.scale(70, 30),
-                    f"Wakeup Glucose:\n{row['wakeup_glucose']:.0f} mg/dL",
-                    fontsize=fs, fontweight="bold", color="darkblue", ha="center", va="bottom",
-                    bbox=dict(boxstyle="round,pad=0.3", fc="blue", alpha=0.1, ec="black", lw=0.8),
-                    clip_on=True
-                )
+            # Break segments at state changes or big time gaps
+            breaks = (sub["time"].diff() > self.gap) | (sub["_state"].diff().fillna(0) != 0)
+            seg_id = breaks.cumsum()
 
+            lw = v.scale(2.5, 1.2)
+            for _, seg in sub.groupby(seg_id):
+                s = int(seg["_state"].iloc[0])
+                color = self.colors["in"] if s == 0 else (self.colors["high"] if s > 0 else self.colors["low"])
+                i0 = int(seg.index.min())
+                if i0 > 0:
+                    seg = pd.concat([sub.loc[[i0-1]], seg], axis=0)
+                ax.plot(seg["time"], seg["gl"],
+                        color=color, linewidth=lw,
+                        solid_capstyle="round", zorder=4, clip_on=True)
 
 class FoodEntryOverlay:
     def __init__(self, food_entry_path, filename):
@@ -100,115 +118,9 @@ class FoodEntryOverlay:
                     sel.annotation.figure.canvas.draw_idle()
 
 
-class TimeInRangeOverlay:
-    def __init__(self, low=70, high=180,
-                 colors=None, show_lines=True, gap_minutes=10):
-        self.low = low
-        self.high = high
-        self.show_lines = show_lines
-        self.gap = Timedelta(minutes=gap_minutes)
-        self.colors = colors or {
-            "in":   "#22a559",  # green
-            "low":  "#d9534f",  # red
-            "high": "#f39c12",  # orange
-            "line": "#e0e0e0"   # threshold lines
-        }
-
-    def draw(self):
-        v = self.viewer
-        for ax, start, end in v.iter_axes_by_time():
-            # Threshold lines
-            if self.show_lines:
-                ax.axhline(self.low,  color=self.colors["line"], linewidth=1.0, zorder=1)
-                ax.axhline(self.high, color=self.colors["line"], linewidth=1.0, zorder=1)
-
-            # Data in this axis window
-            sub = v.df[(v.df["time"] >= start) & (v.df["time"] <= end)][["time", "gl"]].dropna()
-            if sub.empty:
-                continue
-            sub = sub.sort_values("time").reset_index(drop=True)
-
-            # Classify each point: -1 (below), 0 (in), +1 (above)
-            state = np.where(sub["gl"] < self.low, -1,
-                             np.where(sub["gl"] > self.high, 1, 0))
-            sub["_state"] = state
-
-            # Break segments at state changes or big time gaps
-            breaks = (sub["time"].diff() > self.gap) | (sub["_state"].diff().fillna(0) != 0)
-            seg_id = breaks.cumsum()
-
-            lw = v.scale(2.5, 1.2)
-            for _, seg in sub.groupby(seg_id):
-                s = int(seg["_state"].iloc[0])
-                color = self.colors["in"] if s == 0 else (self.colors["high"] if s > 0 else self.colors["low"])
-                i0 = int(seg.index.min())
-                if i0 > 0:
-                    seg = pd.concat([sub.loc[[i0-1]], seg], axis=0)
-                ax.plot(seg["time"], seg["gl"],
-                        color=color, linewidth=lw,
-                        solid_capstyle="round", zorder=4, clip_on=True)
-
-
-class PPGROverlay:
-    def __init__(self,
-                 food_entry_path,
-                 filename: str | None = None,
-                 window_minutes: int = 120,
-                 gap_minutes: int | None = 10):
-        self.food_entry_path = food_entry_path
-        self.filename = filename
-        self.window = pd.Timedelta(minutes=window_minutes)
-        self.gap = (pd.Timedelta(minutes=gap_minutes) if gap_minutes is not None else None)
-
-    def draw(self):
-        v = self.viewer
-        tz = getattr(v.view_start, "tzinfo", None)
-
-        # Load food log aligned to the viewer's timezone (same pattern you use elsewhere)
-        food_df = load_food_entry_data(base_path=self.food_entry_path, 
-                                subject_id=v.subject_id,
-                                filename=self.filename)
-        if food_df is None or food_df.empty:
-            return
-
-        # Meals that overlap the visible window once expanded by the PPGR window
-        meals = food_df[(food_df["time"] < v.view_end) & (food_df["time"] + self.window > v.view_start)]
-        if meals.empty:
-            return
-
-        lw = v.scale(3.0, 1.6)
-
-        for ax, start, end in v.iter_axes_by_time():
-            m_ax = meals[(meals["time"] < end) & (meals["time"] + self.window > start)]
-            if m_ax.empty:
-                continue
-
-            for _, m in m_ax.iterrows():
-                t0 = max(m["time"], start)
-                t1 = min(m["time"] + self.window, end)
-
-                sub = v.df[(v.df["time"] >= t0) & (v.df["time"] <= t1)][["time", "gl"]].dropna()
-                if sub.shape[0] < 2:
-                    continue
-                sub = sub.sort_values("time").reset_index(drop=True)
-
-                # Break only across large dropouts; keep continuous color otherwise
-                if self.gap is not None:
-                    seg_id = (sub["time"].diff() > self.gap).fillna(False).cumsum()
-                else:
-                    seg_id = pd.Series(0, index=sub.index)
-
-                for _, seg in sub.groupby(seg_id):
-                    if len(seg) < 2:
-                        continue
-                    ax.plot(
-                        seg["time"], seg["gl"],
-                        color="#6c5ce7",
-                        linewidth=lw, solid_capstyle="round",
-                        zorder=6, clip_on=True
-                    )
-
-
+# --------------------------------
+# CGM Biomarker Overlays
+# --------------------------------
 class CgmMeasuresOverlay:
 
     def __init__(self,
@@ -344,22 +256,12 @@ class MageOverlay:
                  short_win: str = "30min",
                  long_win: str = "2h",
                  sd_multiplier: float = 1.0,
-                 color_up: str = "#8bd3c7",
-                 color_down: str = "#f4a6b8",
-                 fill_alpha: float = 0.18,
-                 line_alpha: float = 0.9,
-                 show_ma: bool = False,
-                 ma_colors: tuple[str, str] = ("#2c7fb8", "#7b3294")):
+                 show_ma: bool = False):
         self.resample_rule = resample_rule
         self.short_win = short_win
         self.long_win = long_win
         self.sd_multiplier = sd_multiplier
-        self.color_up = color_up
-        self.color_down = color_down
-        self.fill_alpha = fill_alpha
-        self.line_alpha = line_alpha
         self.show_ma = show_ma
-        self.ma_colors = ma_colors
 
     def _subset_window(self, df: pd.DataFrame, start, end) -> pd.DataFrame:
         return df[(df["time"] >= start) & (df["time"] < end)].copy()
@@ -385,9 +287,9 @@ class MageOverlay:
         sma = s5.rolling(self.short_win, min_periods=1, center=True).mean()
         lma = s5.rolling(self.long_win,  min_periods=1, center=True).mean()
 
-        ax.plot(sma.index, sma.values, color=self.ma_colors[0],
+        ax.plot(sma.index, sma.values, color="#2c7fb8",
                 linewidth=viewer.scale(1.0, 0.8), alpha=0.7, zorder=2)
-        ax.plot(lma.index, lma.values, color=self.ma_colors[1],
+        ax.plot(lma.index, lma.values, color="#7b3294",
                 linewidth=viewer.scale(1.0, 0.8), alpha=0.7, zorder=2)
 
     def draw(self):
@@ -421,17 +323,115 @@ class MageOverlay:
             gmin, gmax, g_first, g_last = self._local_minmax(window_df, t0, t1)
 
             is_up = (g_last >= g_first)
-            color = self.color_up if is_up else self.color_down
+            color = "#8bd3c7" if is_up else "#f4a6b8"
 
             # Shade the segment duration
-            ax.axvspan(t0, t1, color=color, alpha=self.fill_alpha, zorder=1)
+            ax.axvspan(t0, t1, color=color, alpha=0.18, zorder=1)
 
             # Amplitude whisker at midpoint
             ax.vlines(t_mid, gmin, gmax, color=color,
-                      linewidth=viewer.scale(2.0, 1.5), alpha=self.line_alpha, zorder=3)
+                      linewidth=viewer.scale(2.0, 1.5), alpha=0.9, zorder=3)
 
             # Small end-caps at min/max (to visually bracket amplitude)
             ax.hlines(gmin, t_mid - cap_half, t_mid + cap_half, color=color,
-                      linewidth=viewer.scale(1.5, 1.2), alpha=self.line_alpha, zorder=3)
+                      linewidth=viewer.scale(1.5, 1.2), alpha=0.9, zorder=3)
             ax.hlines(gmax, t_mid - cap_half, t_mid + cap_half, color=color,
-                      linewidth=viewer.scale(1.5, 1.2), alpha=self.line_alpha, zorder=3)
+                      linewidth=viewer.scale(1.5, 1.2), alpha=0.9, zorder=3)
+            
+
+# --------------------------------
+# Multi-modal Biomarker Overlays
+# --------------------------------
+class WakeupGlucoseOverlay:
+    def __init__(self, sleep_base_path, filename, min_sleep_hours=8.0):
+        self.sleep_base_path = sleep_base_path
+        self.min_sleep_hours = min_sleep_hours
+        self.filename = filename
+
+    def draw(self):
+        viewer = self.viewer
+        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
+        wg_df = extract_wakeup_glucose(viewer.df, sleep_df, min_sleep_hours=self.min_sleep_hours)
+        if wg_df.empty:
+            return
+
+        wg_df = wg_df[
+            (wg_df["wakeup_time"] >= viewer.view_start) & (wg_df["wakeup_time"] < viewer.view_end)
+        ]
+
+        for ax, start, end in viewer.iter_axes_by_time():
+            ax_df = wg_df[(wg_df["wakeup_time"] >= start) & (wg_df["wakeup_time"] < end)]
+            for _, row in ax_df.iterrows():
+                s = viewer.scale(150, 60)
+                fs = viewer.scale(10, 7)
+
+                ax.scatter(row["wakeup_time"], row["wakeup_glucose"],
+                           color="blue", s=s, edgecolor="white", linewidth=1.2, alpha=1, zorder=5)
+                ax.text(
+                    row["wakeup_time"], row["wakeup_glucose"] - viewer.scale(70, 30),
+                    f"Wakeup Glucose:\n{row['wakeup_glucose']:.0f} mg/dL",
+                    fontsize=fs, fontweight="bold", color="darkblue", ha="center", va="bottom",
+                    bbox=dict(boxstyle="round,pad=0.3", fc="blue", alpha=0.1, ec="black", lw=0.8),
+                    clip_on=True
+                )
+
+class PPGROverlay:
+    def __init__(self,
+                 food_entry_path,
+                 filename: str | None = None,
+                 window_minutes: int = 120,
+                 gap_minutes: int | None = 10):
+        self.food_entry_path = food_entry_path
+        self.filename = filename
+        self.window = pd.Timedelta(minutes=window_minutes)
+        self.gap = (pd.Timedelta(minutes=gap_minutes) if gap_minutes is not None else None)
+
+    def draw(self):
+        v = self.viewer
+        tz = getattr(v.view_start, "tzinfo", None)
+
+        # Load food log aligned to the viewer's timezone (same pattern you use elsewhere)
+        food_df = load_food_entry_data(base_path=self.food_entry_path, 
+                                subject_id=v.subject_id,
+                                filename=self.filename)
+        if food_df is None or food_df.empty:
+            return
+
+        # Meals that overlap the visible window once expanded by the PPGR window
+        meals = food_df[(food_df["time"] < v.view_end) & (food_df["time"] + self.window > v.view_start)]
+        if meals.empty:
+            return
+
+        lw = v.scale(3.0, 1.6)
+
+        for ax, start, end in v.iter_axes_by_time():
+            m_ax = meals[(meals["time"] < end) & (meals["time"] + self.window > start)]
+            if m_ax.empty:
+                continue
+
+            for _, m in m_ax.iterrows():
+                t0 = max(m["time"], start)
+                t1 = min(m["time"] + self.window, end)
+
+                sub = v.df[(v.df["time"] >= t0) & (v.df["time"] <= t1)][["time", "gl"]].dropna()
+                if sub.shape[0] < 2:
+                    continue
+                sub = sub.sort_values("time").reset_index(drop=True)
+
+                # Break only across large dropouts; keep continuous color otherwise
+                if self.gap is not None:
+                    seg_id = (sub["time"].diff() > self.gap).fillna(False).cumsum()
+                else:
+                    seg_id = pd.Series(0, index=sub.index)
+
+                for _, seg in sub.groupby(seg_id):
+                    if len(seg) < 2:
+                        continue
+                    ax.plot(
+                        seg["time"], seg["gl"],
+                        color="#6c5ce7",
+                        linewidth=lw, solid_capstyle="round",
+                        zorder=6, clip_on=True
+                    )
+
+
