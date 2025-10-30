@@ -8,13 +8,14 @@ from cgm_methods import detect_stable_glucose, detect_fasting_segments, extract_
 from cgmquantify import summarize_measures, cv, mage_ma_segments
 
 class WakeupGlucoseOverlay:
-    def __init__(self, sleep_base_path, min_sleep_hours=8.0):
+    def __init__(self, sleep_base_path, filename, min_sleep_hours=8.0):
         self.sleep_base_path = sleep_base_path
         self.min_sleep_hours = min_sleep_hours
+        self.filename = filename
 
     def draw(self):
         viewer = self.viewer
-        sleep_df = load_sleep_data(self.sleep_base_path, viewer.subject_id)
+        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
         wg_df = extract_wakeup_glucose(viewer.df, sleep_df, min_sleep_hours=self.min_sleep_hours)
         if wg_df.empty:
             return
@@ -30,12 +31,12 @@ class WakeupGlucoseOverlay:
                 fs = viewer.scale(10, 7)
 
                 ax.scatter(row["wakeup_time"], row["wakeup_glucose"],
-                           color="green", s=s, edgecolor="white", linewidth=1.2, alpha=1, zorder=5)
+                           color="blue", s=s, edgecolor="white", linewidth=1.2, alpha=1, zorder=5)
                 ax.text(
                     row["wakeup_time"], row["wakeup_glucose"] - viewer.scale(70, 30),
                     f"Wakeup Glucose:\n{row['wakeup_glucose']:.0f} mg/dL",
-                    fontsize=fs, fontweight="bold", color="black", ha="center", va="bottom",
-                    bbox=dict(boxstyle="round,pad=0.3", fc="lightgray", alpha=0.8, ec="black", lw=0.8),
+                    fontsize=fs, fontweight="bold", color="darkblue", ha="center", va="bottom",
+                    bbox=dict(boxstyle="round,pad=0.3", fc="blue", alpha=0.1, ec="black", lw=0.8),
                     clip_on=True
                 )
 
@@ -158,9 +159,10 @@ class FoodEntryOverlay:
 
 
 class FastingGlucoseOverlay:
-    def __init__(self, diet_base_path, fasting_window_hours=8.0):
-        self.diet_base_path = diet_base_path
+    def __init__(self, food_entry_path, filename, fasting_window_hours=8.0):
+        self.food_entry_path = food_entry_path
         self.fasting_window_hours = fasting_window_hours
+        self.filename = filename
 
     def draw(self):
         viewer = self.viewer
@@ -252,10 +254,12 @@ class TimeInRangeOverlay:
 
 class PPGROverlay:
     def __init__(self,
-                 food_base_path,
+                 food_entry_path,
+                 filename: str | None = None,
                  window_minutes: int = 120,
                  gap_minutes: int | None = 10):
-        self.food_base_path = food_base_path
+        self.food_entry_path = food_entry_path
+        self.filename = filename
         self.window = pd.Timedelta(minutes=window_minutes)
         self.gap = (pd.Timedelta(minutes=gap_minutes) if gap_minutes is not None else None)
 
