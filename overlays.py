@@ -41,64 +41,6 @@ class WakeupGlucoseOverlay:
                 )
 
 
-class PhysicalActivityOverlay:
-    def __init__(self, activity_base_path):
-        self.activity_base_path = activity_base_path
-
-    def draw(self):
-        viewer = self.viewer
-        subject_id = viewer.subject_id
-        activity_df = load_activity_data(self.activity_base_path, subject_id)
-
-        if activity_df.empty:
-            return
-
-        # Filter activities in view window
-        view_df = activity_df[
-            (activity_df["start"] < viewer.view_end) & (activity_df["end"] > viewer.view_start)
-        ]
-        view_df = view_df[view_df["steps"] > 0]
-        if view_df.empty:
-            return
-
-        for ax, start, end in viewer.iter_axes_by_time():
-            ax_df = view_df[(view_df["start"] < end) & (view_df["end"] > start)]
-            for _, row in ax_df.iterrows():
-                ax.axvspan(max(row["start"], start), min(row["end"], end), ymax=0.15,
-                           color="orange", alpha=0.2, zorder=1)
-
-
-class StableGlucoseOverlay:
-    def __init__(self, method="low_variability", **kwargs):
-        self.method = method
-        self.kwargs = kwargs
-        
-    def draw(self):
-        viewer = self.viewer
-        classified = detect_stable_glucose(viewer.df, method=self.method, **self.kwargs)
-        stable_df = classified[classified["stable_label"] == "stable"]
-
-        if stable_df.empty:
-            return
-        
-        stable_df = stable_df.reset_index(drop=True)
-
-        for ax, start, end in viewer.iter_axes_by_time():
-            subset = stable_df[(stable_df["time"] >= start) & (stable_df["time"] < end)]
-            if subset.empty:
-                continue 
-                
-            subset = subset.reset_index(drop=True)
-            segment_id = (subset["time"].diff() > Timedelta(minutes=10)).cumsum()
-            for _, seg in subset.groupby(segment_id):
-                lw = viewer.scale(4, 2)
-                ax.plot(
-                    seg["time"], seg["gl"],
-                    color="#B4CBF0", linewidth=lw, alpha=0.8,
-                    solid_capstyle="round", zorder=4
-                )
-
-
 class FoodEntryOverlay:
     def __init__(self, food_entry_path, filename):
         self.food_entry_path = food_entry_path
@@ -156,51 +98,6 @@ class FoodEntryOverlay:
                 sel.annotation.set_visible(False)
                 if sel.annotation.figure:
                     sel.annotation.figure.canvas.draw_idle()
-
-
-class FastingGlucoseOverlay:
-    def __init__(self, food_entry_path, filename, fasting_window_hours=8.0):
-        self.food_entry_path = food_entry_path
-        self.fasting_window_hours = fasting_window_hours
-        self.filename = filename
-
-    def draw(self):
-        viewer = self.viewer
-        diet_df = load_food_entry_data(base_path=self.food_entry_path, 
-                                       subject_id=viewer.subject_id,
-                                       filename=self.filename)
-        if diet_df.empty:
-            return
-
-        classified = detect_fasting_segments(viewer.df, diet_df, self.fasting_window_hours)
-        classified = classified[
-            (classified["time"] >= viewer.view_start) & (classified["time"] < viewer.view_end)
-        ]
-        classified = classified[classified["fasting_label"] == "fasting"]
-
-        if classified.empty:
-            return
-
-        group_id = (classified.index.to_series().diff() > 1).cumsum()
-
-        for ax, start, end in viewer.iter_axes_by_time():
-            subset = classified[(classified["time"] >= start) & (classified["time"] < end)]
-            if subset.empty:
-                continue
-
-            segment_id = (subset["time"].diff() > Timedelta(minutes=10)).cumsum()
-            for _, seg in subset.groupby(segment_id):
-                ax.plot(seg["time"], seg["gl"], color="orange", linewidth=viewer.scale(4, 2),
-                        solid_capstyle="round", zorder=4)
-
-                # Median annotation
-                median = np.median(seg["gl"])
-                mid_time = seg["time"].iloc[len(seg) // 2]
-                ax.text(mid_time, median + viewer.scale(25, 15),
-                        f"Median FG: {median:.1f}",
-                        fontsize=viewer.scale(9, 6),
-                        color="orange", ha="center", va="bottom",
-                        bbox=dict(facecolor="white", alpha=0.8))
 
 
 class TimeInRangeOverlay:
