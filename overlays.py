@@ -9,6 +9,55 @@ from cgmquantify import summarize_measures, cv, mage_ma_segments
 
 
 # --------------------------------
+# Make your own Overlay!
+# --------------------------------
+class MeanGlucoseOverlay:
+    # TODO: Add a "scope" parameter which allows you to compute mean glucose
+    # within a single day or across the entire tracing.
+    def __init__(self):
+        self.scope = "daily" # "daily" or "full"
+
+    def draw(self):
+        # TODO: Attach the viewer
+        viewer = ...
+
+        # Optional: Uncomment if you decide to take on the cursor challenge
+        # lines = []
+
+        for ax, start, end in viewer.iter_axes_by_time():
+            # TODO: Access the CGM data based on given scope
+            if self.scope == "full":
+                ...
+            else:
+                ...
+
+            # TODO: Compute the mean glucose for given window
+            mean_glucose = ...
+
+            # TODO: Draw the mean line using curren axis
+            ln = ax.axhline(
+                # Fill in parameters
+                # Documentation on hline method:
+                # https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axhline.html
+            )
+
+            # Optional: Uncomment if you decide to take on the cursor challenge
+            # lines.append((ln, mean_glucose, start, end))
+        
+        # (Optional)
+        # TODO: Add a cursor tooltip to show mean glucose value
+        # if lines:
+        #     cursor = mplcursors.cursor([ln for (ln, _, _, _) in lines], hover=True)
+
+        # @cursor.connect("add")
+        # def _on_add(sel):
+        #     artist = sel.artist
+        #     ...
+        
+        #     sel.annotation.set_text()
+
+
+# --------------------------------
 # Basic Overlays
 # --------------------------------
 class TimeInRangeOverlay:
