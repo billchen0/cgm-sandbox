@@ -202,6 +202,9 @@ class CvOverlay:
         viewer = getattr(self, "viewer", None)
         ax = getattr(viewer, "ax_cgm", None)
 
+        if ax is None:
+            return
+
         if self.scope == "full":
             w = viewer.df
         else:
@@ -367,13 +370,15 @@ class WakeupGlucoseOverlay:
 
                 ax.scatter(row["wakeup_time"], row["wakeup_glucose"],
                            color="blue", s=s, edgecolor="white", linewidth=1.2, alpha=1, zorder=5)
-                ax.text(
-                    row["wakeup_time"], row["wakeup_glucose"] - viewer.scale(70, 30),
-                    f"Wakeup Glucose:\n{row['wakeup_glucose']:.0f} mg/dL",
-                    fontsize=fs, fontweight="bold", color="darkblue", ha="center", va="bottom",
-                    bbox=dict(boxstyle="round,pad=0.3", fc="blue", alpha=0.1, ec="black", lw=0.8),
-                    clip_on=True
-                )
+                if getattr(viewer, "view_mode", None) != "full":
+                    ax.text(
+                        row["wakeup_time"], row["wakeup_glucose"] - viewer.scale(70, 30),
+                        f"Wakeup Glucose:\n{row['wakeup_glucose']:.0f} mg/dL",
+                        fontsize=fs, fontweight="bold", color="darkblue", ha="center", va="bottom",
+                        bbox=dict(boxstyle="round,pad=0.3", fc="blue", alpha=0.1, ec="black", lw=0.8),
+                        clip_on=True
+                    )
+
 
 class PPGROverlay:
     def __init__(self,
