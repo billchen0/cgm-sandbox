@@ -1,0 +1,1146 @@
+{
+  "header": {
+    "uuid": "b27411f4-358b-44ed-8f0c-1b40a3120858",
+    "schema_id": {
+      "namespace": "ieee",
+      "name": "food-entry",
+      "version": "0.1"
+    },
+    "source_creation_date_time": "2025-10-29T20:16:53Z",
+    "modality": "self-reported",
+    "external_datasheets": [
+      {
+        "datasheet_type": "recording app",
+        "datasheet_reference": "https://cronometer.com/index.html"
+      }
+    ]
+  },
+  "body": [
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-28T09:00:00Z"
+      }
+    },
+    {
+      "food_name": "Chicken Thigh, Skin Removed",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 173.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-28T12:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pistachio Nuts, Raw",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 560.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 28.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-28T19:00:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-29T10:15:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 635.43,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 92.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-29T10:15:00Z"
+      }
+    },
+    {
+      "food_name": "Rold Gold Pretzels, Thins",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 12.55,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 3.14,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-29T19:46:00Z"
+      }
+    },
+    {
+      "food_name": "Nestle, Boost, Chocolate",
+      "food_amount": {
+        "value": 474.0,
+        "unit": "mL"
+      },
+      "calories": {
+        "value": 460.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 82.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T05:15:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 635.43,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 92.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T10:30:00Z"
+      }
+    },
+    {
+      "food_name": "Hass Avocado",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 167.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 8.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Tomato Raw, Includes Cherry, Grape, Roma, medium - 2 3/5\" diameter",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 22.14,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 4.8,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Kraft, Balsamic Vinaigrette",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "tbsp"
+      },
+      "calories": {
+        "value": 33.11,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 2.6,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "White Wine, Other Types",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 192.87,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-30T19:15:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-31T12:09:00Z"
+      }
+    },
+    {
+      "food_name": "Salmon, Atlantic, Wild, Cooked",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "oz"
+      },
+      "calories": {
+        "value": 51.6,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-31T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Tomato Raw, Includes Cherry, Grape, Roma, medium - 2 3/5\" diameter",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 44.28,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 9.6,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-31T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Hass Avocado",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 167.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 8.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-31T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-01-31T19:00:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-01T10:15:00Z"
+      }
+    },
+    {
+      "food_name": "Sushi, California Roll",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 114.03,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 23.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-01T18:15:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-02T11:00:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-02T11:00:00Z"
+      }
+    },
+    {
+      "food_name": "Chicken Salad Sandwich",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 341.87,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 34.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-02T15:20:00Z"
+      }
+    },
+    {
+      "food_name": "French Fries, Cooked from Fresh,  order - from a restaurant",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 332.34,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 43.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-02T15:15:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-03T10:15:00Z"
+      }
+    },
+    {
+      "food_name": "Simply Nature, Berry Acai Berry Bowl, Organic, bowl",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 160.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 24.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-03T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Granola, Homemade",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 519.19,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 64.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-03T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Blueberries, Fresh",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 57.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 14.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-03T15:45:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T10:00:00Z"
+      }
+    },
+    {
+      "food_name": "Salmon, Atlantic, Wild, Cooked",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "oz"
+      },
+      "calories": {
+        "value": 51.6,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T16:00:00Z"
+      }
+    },
+    {
+      "food_name": "Hass Avocado",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 167.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 8.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T16:00:00Z"
+      }
+    },
+    {
+      "food_name": "Tomato Raw, Includes Cherry, Grape, Roma, medium - 2 3/5\" diameter",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 44.28,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 9.6,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T16:00:00Z"
+      }
+    },
+    {
+      "food_name": "Alcoholic Beverage, Wine, Table, White, Pinot Gris, Grigio",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "fl oz"
+      },
+      "calories": {
+        "value": 24.32,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.8,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pop Tart, Brown Sugar Cinnamon",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 400.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 70.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-04T11:30:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-05T09:00:00Z"
+      }
+    },
+    {
+      "food_name": "Eggs, Cooked, large",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 155.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 2.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-05T11:30:00Z"
+      }
+    },
+    {
+      "food_name": "Blueberries, Fresh",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 57.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 14.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-05T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Granola, Homemade",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 519.19,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 64.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-05T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Acai Berry",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "tsp"
+      },
+      "calories": {
+        "value": 5.85,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 1.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-05T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-06T13:00:00Z"
+      }
+    },
+    {
+      "food_name": "Chicken sandwich, with mayo",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 322.99,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 30.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-06T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Alcoholic Beverage, Wine, Table, White, Pinot Gris, Grigio",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "fl oz"
+      },
+      "calories": {
+        "value": 24.32,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.8,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-06T19:30:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-07T08:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pop Tart, Brown Sugar Cinnamon",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 416.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 72.8,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-07T09:40:00Z"
+      }
+    },
+    {
+      "food_name": "Chicken sandwich, with mayo",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 322.99,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 30.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-07T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-07T19:15:00Z"
+      }
+    },
+    {
+      "food_name": "Salmon, Atlantic, Wild, Cooked",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "oz"
+      },
+      "calories": {
+        "value": 51.6,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T09:30:00Z"
+      }
+    },
+    {
+      "food_name": "Potato, Boiled with Skin, small - 1 3/4\" to 2 1/2\" diameter",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 121.6,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 13.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T10:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T11:30:00Z"
+      }
+    },
+    {
+      "food_name": "Tomato Raw, Includes Cherry, Grape, Roma, medium - 2 3/5\" diameter",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 44.28,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 9.6,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Hass Avocado",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 167.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 8.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Salmon, Atlantic, Wild, Cooked",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "oz"
+      },
+      "calories": {
+        "value": 51.6,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-08T17:00:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T09:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 2.0
+      },
+      "calories": {
+        "value": 635.43,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 92.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T09:30:00Z"
+      }
+    },
+    {
+      "food_name": "Acai Berry",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "tsp"
+      },
+      "calories": {
+        "value": 5.85,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 1.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Blueberries, Fresh",
+      "food_amount": {
+        "value": 100.0,
+        "unit": "g"
+      },
+      "calories": {
+        "value": 57.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 14.5,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Granola, Homemade",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 519.19,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 64.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T17:30:00Z"
+      }
+    },
+    {
+      "food_name": "Alcoholic Beverage, Wine, Table, White, Pinot Gris, Grigio",
+      "food_amount": {
+        "value": 1.0,
+        "unit": "fl oz"
+      },
+      "calories": {
+        "value": 24.32,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.8,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-09T18:30:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-10T08:00:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-10T10:10:00Z"
+      }
+    },
+    {
+      "food_name": "Lettuce, Iceberg, medium leaf",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 1.12,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 0.2,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-10T15:00:00Z"
+      }
+    },
+    {
+      "food_name": "Sobey's, Nana's, Samosas, Chicken",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 350.0,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 35.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-10T15:00:00Z"
+      }
+    },
+    {
+      "food_name": "Soy Milk, Vanilla or Other Flavors, Unsweetened, Ready-to-Drink",
+      "food_amount": {
+        "value": 2.0,
+        "unit": "Cup"
+      },
+      "calories": {
+        "value": 147.67,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 6.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-11T07:30:00Z"
+      }
+    },
+    {
+      "food_name": "Pumpkin Pie,  single crust - 1/8 of 9\" pie",
+      "food_amount": {
+        "value": 1.0
+      },
+      "calories": {
+        "value": 317.71,
+        "unit": "kcal"
+      },
+      "carbohydrate": {
+        "value": 46.0,
+        "unit": "g"
+      },
+      "effective_time_frame": {
+        "date_time": "2025-02-11T10:30:00Z"
+      }
+    }
+  ]
+}
