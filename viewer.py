@@ -4,6 +4,7 @@ import matplotlib as mpl
 import pandas as pd
 from ipywidgets import widgets, VBox, HBox, Output, Layout
 from datetime import time, timedelta
+from typing import Literal, Optional
 import os
 
 from loader import load_cgm_data
@@ -18,18 +19,22 @@ if os.path.exists(font_path):
 
 
 class CGMViewer:
-    def __init__(self, 
-                 base_path: str, 
+    def __init__(self,
+                 source: Literal["file", "client"] = "client",
+                 base_path: str | None = None, 
                  subject_id: int | None = None,
                  filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None,
                  gl_range=(0, 400)):
-        self.base_path = base_path
-        self.subject_id = subject_id
+        
         self.y_min, self.y_max = gl_range
-        raw_cgm_df = load_cgm_data(base_path, 
+        
+        raw_cgm_df = load_cgm_data(source=source,
+                                   base_path=base_path, 
                                    subject_id=subject_id, 
-                                   filename=filename, 
-                                   timezone=True)
+                                   filename=filename,
+                                   client_df=client_df
+                                  )
         self.df = process_cgm(raw_cgm_df)
 
         # Extract unique days
