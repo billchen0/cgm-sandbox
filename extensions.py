@@ -3,11 +3,21 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import numpy as np
+from typing import Literal, Optional
 
 class HypnogramExtension:
-    def __init__(self, sleep_base_path, filename, gap_threshold=30):
-        self.sleep_base_path = sleep_base_path
+    def __init__(self,
+                 source: Literal["file", "client"],
+                 base_path: str | None = None, 
+                 subject_id: int | None = None,
+                 filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None,
+                 gap_threshold: int = 30,
+                ):
+        self.source = source
+        self.base_path = base_path
         self.filename = filename
+        self.client_df = client_df
         self.gap_threshold = pd.Timedelta(minutes=gap_threshold)
 
     def draw(self):
@@ -16,7 +26,11 @@ class HypnogramExtension:
         start, end = viewer.view_start, viewer.view_end
 
         # Load sleep data for this subject and restrict to current day
-        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
+        sleep_df = load_sleep_data(source=self.source,
+                                   base_path=self.base_path,
+                                   filename=self.filename,
+                                   client_df=self.client_df
+                                  )
         day_sleep = sleep_df[(sleep_df["start"] < end) & (sleep_df["end"] > start)]
 
         # Stage mapping and background shading

@@ -20,13 +20,14 @@ if os.path.exists(font_path):
 
 class CGMViewer:
     def __init__(self,
-                 source: Literal["file", "client"] = "client",
+                 source: Literal["file", "client"],
                  base_path: str | None = None, 
                  subject_id: int | None = None,
                  filename: str | None = None,
                  client_df: Optional[pd.DataFrame] = None,
                  gl_range=(0, 400)):
-        
+
+        self.subject_id = subject_id
         self.y_min, self.y_max = gl_range
         
         raw_cgm_df = load_cgm_data(source=source,

@@ -3,6 +3,7 @@ from pandas import Timedelta
 import pandas as pd
 import numpy as np
 import mplcursors
+from typing import Literal, Optional
 
 from cgm_methods import extract_wakeup_glucose
 from cgmquantify import summarize_measures, cv, mage_ma_segments
@@ -68,9 +69,9 @@ class TimeInRangeOverlay:
         self.show_lines = show_lines
         self.gap = Timedelta(minutes=gap_minutes)
         self.colors = colors or {
-            "in":   "#22a559",  # green
-            "low":  "#d9534f",  # red
-            "high": "#f39c12",  # orange
+            "in":   "#22a559",
+            "low":  "#d9534f",
+            "high": "#f39c12",
             "line": "#e0e0e0"   # threshold lines
         }
 
@@ -84,8 +85,6 @@ class TimeInRangeOverlay:
 
             # Data in this axis window
             sub = v.df[(v.df["time"] >= start) & (v.df["time"] <= end)][["time", "gl"]].dropna()
-            if sub.empty:
-                continue
             sub = sub.sort_values("time").reset_index(drop=True)
 
             # Classify each point: -1 (below), 0 (in), +1 (above)
@@ -108,10 +107,19 @@ class TimeInRangeOverlay:
                         color=color, linewidth=lw,
                         solid_capstyle="round", zorder=4, clip_on=True)
 
+                
 class FoodEntryOverlay:
-    def __init__(self, food_entry_path, filename):
-        self.food_entry_path = food_entry_path
+    def __init__(self, 
+                 source: Literal["file", "client"] = "client",
+                 base_path: str | None = None,
+                 subject_id: int | None = None,
+                 filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None
+                ):
+        self.source = source
+        self.base_path = base_path
         self.filename = filename
+        self.client_df = client_df
         self._cursor = None
     
     def _size_from_carbs(self, carbs: float, viewer) -> float:
@@ -122,12 +130,14 @@ class FoodEntryOverlay:
 
     def draw(self):
         viewer = self.viewer
-        diet_df = load_food_entry_data(base_path=self.food_entry_path, 
+        food_df = load_food_entry_data(source=self.source,
+                                       base_path=self.base_path, 
                                        subject_id=viewer.subject_id,
-                                       filename=self.filename)
+                                       filename=self.filename,
+                                       client_df=self.client_df)
 
-        day_meals = diet_df[
-            (diet_df["time"] >= viewer.view_start) & (diet_df["time"] < viewer.view_end)
+        day_meals = food_df[
+            (food_df["time"] >= viewer.view_start) & (food_df["time"] < viewer.view_end)
         ]
         if day_meals.empty:
             return
@@ -395,14 +405,29 @@ class MageOverlay:
 # Multi-modal Biomarker Overlays
 # --------------------------------
 class WakeupGlucoseOverlay:
-    def __init__(self, sleep_base_path, filename, min_sleep_hours=8.0):
-        self.sleep_base_path = sleep_base_path
+    def __init__(self,
+                 source: Literal["file", "client"],
+                 base_path: str | None = None, 
+                 subject_id: int | None = None,
+                 filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None,
+                 min_sleep_hours=8.0):
+        self.source = source
+        self.base_path = base_path
+        self.filename = filename
+        self.client_df = client_df
         self.min_sleep_hours = min_sleep_hours
         self.filename = filename
 
     def draw(self):
         viewer = self.viewer
-        sleep_df = load_sleep_data(self.sleep_base_path, filename=self.filename)
+        
+        sleep_df = load_sleep_data(source=self.source,
+                           base_path=self.base_path,
+                           filename=self.filename,
+                           client_df=self.client_df
+                          )
+        
         wg_df = extract_wakeup_glucose(viewer.df, sleep_df, min_sleep_hours=self.min_sleep_hours)
         if wg_df.empty:
             return
@@ -431,12 +456,17 @@ class WakeupGlucoseOverlay:
 
 class PPGROverlay:
     def __init__(self,
-                 food_entry_path,
+                 source: Literal["file", "client"],
+                 base_path: str | None = None, 
+                 subject_id: int | None = None,
                  filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None,
                  window_minutes: int = 120,
                  gap_minutes: int | None = 10):
-        self.food_entry_path = food_entry_path
+        self.source = source
+        self.base_path = base_path
         self.filename = filename
+        self.client_df = client_df
         self.window = pd.Timedelta(minutes=window_minutes)
         self.gap = (pd.Timedelta(minutes=gap_minutes) if gap_minutes is not None else None)
 
@@ -445,16 +475,14 @@ class PPGROverlay:
         tz = getattr(v.view_start, "tzinfo", None)
 
         # Load food log aligned to the viewer's timezone (same pattern you use elsewhere)
-        food_df = load_food_entry_data(base_path=self.food_entry_path, 
-                                subject_id=v.subject_id,
-                                filename=self.filename)
-        if food_df is None or food_df.empty:
-            return
-
+        food_df = load_food_entry_data(source=self.source,
+                                       base_path=self.base_path, 
+                                       subject_id=v.subject_id,
+                                       filename=self.filename,
+                                       client_df=self.client_df)
+        
         # Meals that overlap the visible window once expanded by the PPGR window
         meals = food_df[(food_df["time"] < v.view_end) & (food_df["time"] + self.window > v.view_start)]
-        if meals.empty:
-            return
 
         lw = v.scale(3.0, 1.6)
 
