@@ -7,7 +7,7 @@ We recommend using **Python 3.11*.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/cgm_sandbox.git
+git clone https://github.com/billchen0/cgm-sandbox.git
 cd cgm_sandbox
 ```
 
