@@ -62,6 +62,35 @@ class MeanGlucoseOverlay:
 # Basic Overlays
 # --------------------------------
 class TimeInRangeOverlay:
+    """
+    Overlay that color-codes CGM traces by time-in-range (TIR) categories.
+
+    The signal is segmented into continuous runs, breaking at state transitions
+    (below/in/above range) or large time gaps. Each segment is drawn with a
+    distinct color.
+
+    Parameters
+    ----------
+    low : float, default 70
+        Lower glucose threshold (mg/dL).
+    high : float, default 180
+        Upper glucose threshold (mg/dL).
+    colors : dict or None, default None
+        Mapping of state keys to colors. Expected keys are
+        ``{"in", "low", "high", "line"}``. If ``None``, sensible defaults are used.
+    show_lines : bool, default True
+        If True, draw horizontal threshold guide lines at `low` and `high`.
+    gap_minutes : int, default 10
+        Maximum allowed time gap between consecutive points in a segment. Larger
+        gaps start a new segment.
+
+    Notes
+    -----
+    Requires the viewer to expose:
+    - ``viewer.df`` with columns ``["time", "gl"]``
+    - ``viewer.iter_axes_by_time()`` yielding ``(ax, start, end)``
+    - ``viewer.scale(hi, lo)`` for DPI-aware linewidth scaling.
+    """
     def __init__(self, low=70, high=180,
                  colors=None, show_lines=True, gap_minutes=10):
         self.low = low
@@ -72,7 +101,7 @@ class TimeInRangeOverlay:
             "in":   "#22a559",
             "low":  "#d9534f",
             "high": "#f39c12",
-            "line": "#e0e0e0"   # threshold lines
+            "line": "#e0e0e0"
         }
 
     def draw(self):
@@ -108,9 +137,31 @@ class TimeInRangeOverlay:
                         solid_capstyle="round", zorder=4, clip_on=True)
 
                 
-class FoodEntryOverlay:
+class FoodEntryOverlay
+    """
+    Overlay a marker that annotates CGM with food log entries, scaling marker size by
+    carbohydrate amount and showing hover tooltips.
+
+    Parameters
+    ----------
+    source : {'file', 'client'}
+        Source of the food entries (on-disk file vs. JHE client dataframe).
+    base_path : str or None, default None
+        Base directory for file-based loading (if `source='file'`).
+    subject_id : int or None, default None
+        Optional subject identifier for file-based loaders.
+    filename : str or None, default None
+        File name for file-based loaders.
+    client_df : pandas.DataFrame or None, default None
+        Preloaded food dataframe for `source='client'`.
+
+    Notes
+    -----
+    Expected columns in the loaded food dataframe include at least:
+    ``["time", "food_name", "carbohydrate"]``.
+    """
     def __init__(self, 
-                 source: Literal["file", "client"] = "client",
+                 source: Literal["file", "client"],
                  base_path: str | None = None,
                  subject_id: int | None = None,
                  filename: str | None = None,
@@ -181,7 +232,34 @@ class FoodEntryOverlay:
 # CGM Biomarker Overlays
 # --------------------------------
 class CgmMeasuresOverlay:
+    """
+    Overlay that summarizes key CGM measures (e.g., TIR, CV, GMI, MAGE, HBGI, LBGI)
+    in a compact annotation on the CGM axis.
 
+    Parameters
+    ----------
+    sd_multiplier : float, default 1.0
+        MAGE threshold multiplier used in the underlying summary function.
+    loc : {'top-left', 'top-right'}, default 'top-left'
+        Horizontal anchor for the annotation box.
+    y : float, default 0.965
+        Y-position in axis coordinates for the annotation box.
+    margin : float, default 0.008
+        Horizontal margin in axis coordinates from the anchored side.
+    facecolor : str, default '#f7f7f7'
+        Background color of the annotation box.
+    edgecolor : str, default '#dcdcdc'
+        Edge color of the annotation box.
+    text_color : str, default '#111'
+        Text color.
+    pad : float, default 0.10
+        Padding passed to the Matplotlib boxstyle.
+
+    Notes
+    -----
+    Expects a function ``summarize_measures(df, sd_multiplier)`` to be available
+    and the viewer to provide ``viewer.ax_cgm`` and ``viewer.scale``.
+    """
     def __init__(self,
                  sd_multiplier: float = 1.0,
                  loc: str = "top-left",
@@ -252,6 +330,24 @@ class CgmMeasuresOverlay:
 
 
 class CvOverlay:
+    """
+    Overlay that visualizes mean glucose and ±1 SD band, and annotates CV%.
+
+    Parameters
+    ----------
+    color : str, default '#4a90e2'
+        Base color for mean line and SD band.
+    alpha : float, default 0.14
+        Fill alpha for the SD band.
+    scope : {'window', 'full'}, default 'window'
+        Data scope for statistics. If 'window', use the visible range;
+        if 'full', use the entire dataframe.
+
+    Notes
+    -----
+    Requires a ``cv(df)`` helper that returns CV in percent and
+    a viewer exposing ``viewer.df``, ``viewer.ax_cgm``, and ``viewer.scale``.
+    """
     def __init__(self, color="#4a90e2", alpha=0.14, scope="window"):
         self.color = color
         self.alpha = alpha
@@ -294,24 +390,31 @@ class CvOverlay:
 
 class MageOverlay:
     """
-    Visualizes MAGE (MA) excursions for the *current window* (daily panel):
-      • shaded span over each counted segment [t0, t1]
-      • vertical amplitude bar at segment midpoint from local min→max
-      • optional short/long MAs for context (thin lines)
-    No text values are shown; this is interpretation-first.
+    Visualize Mean Amplitude of Glucose Excursions (MAGE) within the current 
+    window using spans and amplitude whiskers.
+
+    The overlay shades each counted MAGE segment, draws a vertical amplitude
+    line at the segment midpoint from local min → max, and can optionally
+    plot short/long moving averages for context.
 
     Parameters
     ----------
-    resample_rule : str        Default "5min" (must match your mage_ma_segments)
-    short_win     : str        Default "30min"
-    long_win      : str        Default "2H"
-    sd_multiplier : float      Default 1.0 (threshold = sd_multiplier * SD)
-    color_up      : str        Fill/line color when segment trends up (max after min)
-    color_down    : str        Fill/line color when segment trends down (min after max)
-    fill_alpha    : float      Span transparency
-    line_alpha    : float      Amplitude bar transparency
-    show_ma       : bool       Plot short/long MAs for context (thin)
-    ma_colors     : tuple      (short_color, long_color)
+    resample_rule : str, default '5min'
+        Resampling rule for the intermediate regular grid used by MAGE logic.
+    short_win : str, default '30min'
+        Rolling window for the short moving average.
+    long_win : str, default '2h'
+        Rolling window for the long moving average.
+    sd_multiplier : float, default 1.0
+        Threshold multiplier for excursion eligibility (threshold = `mult` * SD).
+    show_ma : bool, default False
+        If True, draw thin short/long moving average lines for context.
+
+    Notes
+    -----
+    Expects a function ``mage_ma_segments(df, resample_rule, short_win, long_win, sd_multiplier)``
+    returning iterable of dicts with keys ``{"t0","t1","t_mid"}``, and a viewer with
+    ``viewer.df``, ``viewer.view_start``, ``viewer.view_end`` and ``viewer.scale``.
     """
     def __init__(self,
                  resample_rule: str = "5min",
@@ -405,6 +508,29 @@ class MageOverlay:
 # Multi-modal Biomarker Overlays
 # --------------------------------
 class WakeupGlucoseOverlay:
+    """
+    Overlay that marks wake-up glucose values derived from sleep data.
+
+    Parameters
+    ----------
+    source : {'file', 'client'}
+        Source of the sleep data (file-based or in-memory).
+    base_path : str or None, default None
+        Base directory for file-based loading (if `source='file'`).
+    subject_id : int or None, default None
+        Optional subject identifier (not used for client data).
+    filename : str or None, default None
+        File name for file-based loaders.
+    client_df : pandas.DataFrame or None, default None
+        Preloaded sleep dataframe for `source='client'`.
+    min_sleep_hours : float, default 8.0
+        Minimum sleep duration (hours) to qualify for a wake-up event.
+
+    Notes
+    -----
+    Relies on helper functions ``load_sleep_data(...)`` and
+    ``extract_wakeup_glucose(cgm_df, sleep_df, min_sleep_hours)``.
+    """
     def __init__(self,
                  source: Literal["file", "client"],
                  base_path: str | None = None, 
@@ -455,6 +581,32 @@ class WakeupGlucoseOverlay:
 
 
 class PPGROverlay:
+    """
+    Overlay that draws postprandial glucose responses (PPGR) following logged meals.
+
+    Parameters
+    ----------
+    source : {'file', 'client'}
+        Source of the meal data (file-based or in-memory).
+    base_path : str or None, default None
+        Base directory for file-based loading (if `source='file'`).
+    subject_id : int or None, default None
+        Optional subject identifier (for file-based loaders).
+    filename : str or None, default None
+        File name for file-based loaders.
+    client_df : pandas.DataFrame or None, default None
+        Preloaded meals dataframe for `source='client'`.
+    window_minutes : int, default 120
+        Length of the PPGR window after each meal.
+    gap_minutes : int or None, default 10
+        Maximum allowed time gap for continuous segments; if ``None``, traces are not broken.
+
+    Notes
+    -----
+    Expects a viewer with ``viewer.df``, ``viewer.iter_axes_by_time()``, and
+    scaling via ``viewer.scale``. Loaded meal dataframe should contain at least
+    ``["time"]``; carbohydrate values are not required for drawing PPGR lines.
+    """
     def __init__(self,
                  source: Literal["file", "client"],
                  base_path: str | None = None, 
@@ -515,5 +667,3 @@ class PPGROverlay:
                         linewidth=lw, solid_capstyle="round",
                         zorder=6, clip_on=True
                     )
-
-

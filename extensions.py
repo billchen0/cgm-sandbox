@@ -6,6 +6,38 @@ import numpy as np
 from typing import Literal, Optional
 
 class HypnogramExtension:
+    """
+    Draw a hypnogram with stage bands and per-episode lines for sleep stages.
+
+    Parameters
+    ----------
+    source : {'file', 'client'}
+        Source of sleep data (on-disk file or in-memory dataframe).
+    base_path : str or None, default None
+        Base directory for file-based loading (if `source='file'`).
+    subject_id : int or None, default None
+        Optional subject identifier (for file-based loaders).
+    filename : str or None, default None
+        File name for file-based loaders.
+    client_df : pandas.DataFrame or None, default None
+        Preloaded sleep dataframe for `source='client'`.
+    gap_threshold : int, default 30
+        Maximum allowed gap (minutes) between consecutive episodes to draw
+        a vertical connector (i.e., visually “stitch” transitions).
+
+    Notes
+    -----
+    Expected columns in the sleep dataframe:
+    - ``start`` : episode start (datetime)
+    - ``end``   : episode end (datetime)
+    - ``stage`` : one of {'Awake', 'REM_sleep', 'Light_sleep', 'Deep_sleep'}
+
+    Expects the environment to provide:
+    - ``load_sleep_data(...)`` function
+    - a viewer with ``viewer.view_start``, ``viewer.view_end``
+    - Matplotlib axis at ``self.ax``
+    - ``mdates`` imported for tick formatting
+    """
     def __init__(self,
                  source: Literal["file", "client"],
                  base_path: str | None = None, 
