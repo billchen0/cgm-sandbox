@@ -8,15 +8,32 @@ from typing import Literal, Optional
 from cgm_methods import extract_wakeup_glucose
 from cgmquantify import summarize_measures, cv, mage_ma_segments
 
+from typing import Literal
+
+
 
 # --------------------------------
 # Make your own Overlay!
 # --------------------------------
 class MeanGlucoseOverlay:
-    # TODO: Add a "scope" parameter which allows you to compute mean glucose
-    # within a single day or across the entire tracing.
-    def __init__(self):
-        self.scope = "daily" # "daily" or "full"
+    def __init__(self,
+                 source: Literal["file", "client"],
+                 base_path: str | None = None,
+                 subject_id: int | None = None,
+                 filename: str | None = None,
+                 client_df: Optional[pd.DataFrame] = None,
+                 # TODO: Add a "scope" parameter which allows you to compute mean glucose
+                 # within a single day or across the entire tracing.
+                )
+        self.source = source
+        self.base_path = base_path,
+        self.subject_id = subject_id,
+        self.filename = filename
+        self.client_df = client_df
+        self._cursor = None
+
+        # TODO: define scope attribute
+        self.scope = ...
 
     def draw(self):
         # TODO: Attach the viewer
@@ -137,7 +154,7 @@ class TimeInRangeOverlay:
                         solid_capstyle="round", zorder=4, clip_on=True)
 
                 
-class FoodEntryOverlay
+class FoodEntryOverlay:
     """
     Overlay a marker that annotates CGM with food log entries, scaling marker size by
     carbohydrate amount and showing hover tooltips.
