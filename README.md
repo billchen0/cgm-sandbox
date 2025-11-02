@@ -1,7 +1,7 @@
 # CGMSandbox
 
 <p align="center">
-  <img src="logo/cgmsandbox_logo.png" alt="CGM Sandbox Logo" width="50"/>
+  <img src="logo/cgmsandbox_logo.png" alt="CGM Sandbox Logo" width="100"/>
 </p>
 
 CGMSandbox is an open-source, modular tool enabled by JupyterHealth Exchange. It is designed to make continuous glucose monitoring (CGM) data interactive, reproducible, and extensible.
