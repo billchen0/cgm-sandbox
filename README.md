@@ -37,15 +37,15 @@ Below is an overview of the CGMSandbox codebase structure. Files that you will a
 cgm-sandbox/
 ├── fonts/                      # Custom fonts for the CGMSandbox Environment
 ├── sample_subject/             # Local data files if JupyterHealth Client aren't accessible for some reason
-├── solutions/                  # Instructor reference implementations
+├── solutions/                  # Solutions for hands-on exercises and code-alongs
 │
-├── cgm_methods.py              # Core CGM algorithms (MAGE, GMI, CV, etc.)
-├── cgmquantify.py              # Batch-level CGM metric computation
-├── extensions.py          🧩   # Extend viewer behavior with new overlays or UI modules
-├── loader.py                   # Data loading utilities (CGM, food logs, etc.)
+├── cgm_methods.py              # Preprocessing and CGM data manipulation
+├── cgmquantify.py              # For computing CGM-based biomarkers (GMI, CV, MAGE, etc.)
+├── extensions.py               # Extend the viewer with additional figures
+├── loader.py                   # Data loading utilities for CGM, food entry, and sleep
 ├── overlays.py            🧩   # Where you’ll create your own visualization overlays
 ├── viewer.py                   # Core plotting engine (handles axes, scaling, time windows)
 │
-├── visualize_sample.ipynb      # Example notebook for running the Sandbox
-├── requirements.txt            # Minimal environment dependencies
+├── cgmsandbox.ipynb       🧩   # Example notebook for running the Sandbox
+├── requirements.txt            # Environment dependencies
 └── README.md                   # You are here 🙂
