@@ -24,7 +24,7 @@ class MeanGlucoseOverlay:
                  client_df: Optional[pd.DataFrame] = None,
                  # TODO: Add a "scope" parameter which allows you to compute mean glucose
                  # within a single day or across the entire tracing.
-                )
+                ):
         self.source = source
         self.base_path = base_path,
         self.subject_id = subject_id,
